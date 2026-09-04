@@ -3,183 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TVCOM - Tu Televisión Abierta y Gratis</title>
+    <title>TVCOM - Experiencia de Televisión Inmersiva</title>
     <style>
-        body {
-            background-color: #111;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --glow-color: #ff002b;
+            --glass-bg: rgba(15, 15, 25, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-sec: #a1a1aa;
+        }
+
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050508;
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        /* LOGO DE LA MARCA FLOTANTE */
+        .brand-header {
+            position: absolute;
+            top: 25px;
+            left: 35px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-logo {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            background: linear-gradient(45deg, #ff002b, #ff6b81);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 0, 43, 0.3);
+        }
+
+        .badge-live {
+            background: rgba(255, 0, 43, 0.2);
+            border: 1px solid var(--glow-color);
+            color: #ff3355;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(255, 0, 43, 0.2);
+        }
+
+        /* ESCENARIO PRINCIPAL: LA PANTALLA FLOTANTE */
+        .theater-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
+            z-index: 2;
+            box-sizing: border-box;
+            padding-bottom: 140px; /* Espacio para la barra de canales inferior */
         }
-        header {
-            width: 100%;
-            background-color: #000;
-            padding: 15px 0;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #e50914;
-            border-bottom: 2px solid #222;
-        }
-        #player-container {
-            width: 100%;
-            max-width: 800px;
-            margin: 20px 0;
-            background-color: black;
+
+        .screen-wrapper {
+            position: relative;
+            width: 55%;
             aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8), 
+                        0 0 80px rgba(255, 0, 43, 0.1);
+            border: 1px solid var(--glass-border);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        .screen-wrapper:hover {
+            transform: scale(1.02);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.9), 
+                        0 0 100px rgba(255, 0, 43, 0.2);
+        }
+
         video {
             width: 100%;
             height: 100%;
+            object-fit: contain;
         }
-        #channels-container {
-            width: 90%;
-            max-width: 800px;
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            padding: 15px;
+
+        /* TARJETA DE INFORMACIÓN EPG FLOTANTE */
+        .info-card {
+            margin-top: 25px;
+            width: 55%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px 25px;
             box-sizing: border-box;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .channel-item {
             display: flex;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #333;
+            justify-content: space-between;
+        }
+
+        .meta-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .meta-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .meta-text .channel-title {
+            font-size: 13px;
+            color: #ff3355;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .meta-text .program-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .meta-right {
+            text-align: right;
+        }
+
+        .clock-live {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-sec);
+            background: rgba(255,255,255,0.05);
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* CINTA DE DIALES HORIZONTAL (EL CARRETE DE CANALES) */
+        .carousel-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(to top, rgba(5,5,8,1) 80%, rgba(5,5,8,0));
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            width: 100%;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+        }
+
+        /* Ocultar barra de scroll estéticamente */
+        .carousel-track::-webkit-scrollbar {
+            height: 4px;
+        }
+        .carousel-track::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 43, 0.3);
+            border-radius: 10px;
+        }
+
+        .dial-card {
+            flex: 0 0 240px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
         }
-        .channel-item:hover {
-            background-color: #333;
+
+        .dial-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 0, 43, 0.4);
         }
-        .channel-logo {
+
+        .dial-card.active {
+            background: rgba(255, 0, 43, 0.1);
+            border-color: var(--glow-color);
+            box-shadow: 0 0 20px rgba(255, 0, 43, 0.15);
+        }
+
+        .dial-num {
+            font-size: 20px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.15);
+            transition: color 0.3s;
+        }
+
+        .dial-card.active .dial-num {
+            color: #ff3355;
+        }
+
+        .card-thumb {
             width: 45px;
             height: 45px;
             object-fit: contain;
-            margin-right: 15px;
-            background: #222;
-            border-radius: 4px;
+            background: #000;
+            border-radius: 6px;
+            padding: 3px;
         }
-        .channel-info {
+
+        .card-info {
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            width: 100%;
         }
-        .channel-name {
+
+        .card-ch-name {
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .channel-dial {
+
+        .card-epg-info {
             font-size: 12px;
-            color: #888;
+            color: var(--text-sec);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        /* Adaptación para pantallas de tablets o móviles */
+        @media (max-width: 1200px) {
+            .screen-wrapper, .info-card { width: 85%; }
+        }
+        @media (max-width: 768px) {
+            .screen-wrapper, .info-card { width: 95%; }
+            .brand-header { left: 20px; top: 15px; }
+            .info-card { padding: 10px 15px; }
+            .meta-text .program-title { font-size: 15px; }
         }
     </style>
 </head>
 <body>
 
-    <header>TVCOM</header>
-
-    <div id="player-container">
-        <video id="video" controls autoplay muted></video>
+    <!-- CABECERA FLOTANTE -->
+    <div class="brand-header">
+        <div class="brand-logo">TVCOM</div>
+        <div class="badge-live">En Directo</div>
     </div>
 
-    <div id="channels-container">
-        <h3>Guía de Canales</h3>
-        <div id="playlist">Cargando canales instantáneamente...</div>
+    <!-- ESCENARIO DEL REPRODUCTOR MÁSTER -->
+    <div class="theater-container">
+        <div class="screen-wrapper">
+            <video id="video" controls autoplay muted></video>
+        </div>
+
+        <!-- TARJETA INFORMATIVA FLOTANTE -->
+        <div class="info-card">
+            <div class="meta-left">
+                <img id="now-logo" class="meta-logo" src="https://placeholder.com" alt="Logo">
+                <div class="meta-text">
+                    <div id="now-dial-name" class="channel-title">Sintonizando...</div>
+                    <div id="now-program" class="program-title">Cargando parrilla lineal de canales...</div>
+                </div>
+            </div>
+            <div class="meta-right">
+                <div id="live-clock" class="clock-live">00:00:00</div>
+            </div>
+        </div>
     </div>
 
-    <!-- CARGA LOCAL PROPIA: Ahora el motor se lee directo desde tu propio servidor GitHub -->
+    <!-- CINTA DE DIALES HORIZONTAL INFERIOR -->
+    <div class="carousel-section">
+        <div id="carousel-track" class="carousel-track">
+            <!-- Los diales se inyectan dinámicamente aquí -->
+        </div>
+    </div>
+
+    <!-- Motor de vídeo local propio -->
     <script src="hls.min.js"></script>
 
     <script>
         const m3uUrl = 'lista.m3u';
         const video = document.getElementById('video');
-        const playlistContainer = document.getElementById('playlist');
+        const trackContainer = document.getElementById('carousel-track');
         let hlsInstance = null;
 
-        function playChannel(url) {
-            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                if (hlsInstance) {
-                    hlsInstance.destroy();
-                }
-                hlsInstance = new Hls();
-                hlsInstance.loadSource(url);
-                hlsInstance.attachMedia(video);
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(e => console.log("Auto-play bloqueado"));
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
-                video.play().catch(e => console.log("Auto-play bloqueado"));
-            }
+        // Reloj en tiempo real para dar sensación de directo estricto
+        function startClock() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+            }, 1000);
         }
 
-        async function loadPlaylist() {
-            try {
-                const response = await fetch(m3uUrl);
-                if (!response.ok) throw new Error("Falta el archivo lista.m3u");
-                const text = await response.text();
-                
-                const lines = text.split('\n');
-                let channels = [];
-                let currentChannel = null;
+        // Generador inteligente de programación según dial y hora exacta
+        function generateEPG(name, dial) {
+            const hora = new Date().getHours();
+            const numDial = parseInt(dial);
 
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line.startsWith('#EXTINF:')) {
-                        const chnoMatch = line.match(/tvg-chno="([^"]+)"/);
-                        const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-                        const nameParts = line.split(',');
-                        const name = nameParts[nameParts.length - 1].trim();
-
-                        currentChannel = {
-                            dial: chnoMatch ? chnoMatch[1] : (channels.length + 1),
-                            logo: logoMatch ? logoMatch[1] : 'https://placeholder.com',
-                            name: name
-                        };
-                    } else if (line.startsWith('http') && currentChannel) {
-                        currentChannel.url = line;
-                        channels.push(currentChannel);
-                        currentChannel = null;
-                    }
-                }
-
-                playlistContainer.innerHTML = '';
-                if (channels.length === 0) {
-                    playlistContainer.innerHTML = 'No hay canales válidos.';
-                    return;
-                }
-
-                channels.forEach((channel, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'channel-item';
-                    item.innerHTML = `
-                        <img class="channel-logo" src="${channel.logo}" onerror="this.src='https://placeholder.com'">
-                        <div class="channel-info">
-                            <span class="channel-name">${channel.name}</span>
-                            <span class="channel-dial">Dial ${channel.dial}</span>
-                        </div>
-                    `;
-                    item.addEventListener('click', () => playChannel(channel.url));
-                    playlistContainer.appendChild(item);
-
-                    if (index === 0) {
-                        playChannel(channel.url);
-                    }
-                });
-
-            } catch (error) {
-                playlistContainer.innerHTML = 'Error al cargar la lista local.';
-                console.error(error);
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', loadPlaylist);
-    </script>
-</body>
-</html>
+Use code with caution.if (numDial >= 100 && numDial < 200) {if (hora >= 6 && hora < 14) return "Informativo Matinal y Análisis de Actualidad";if (hora >= 14 && hora < 20) return "Conexión en Directo y Debate de Tarde";return "Telediario Nocturno y Crónica de Cierre";}if (numDial >= 200 && numDial < 300) {if (hora % 2 === 0) return "Cine: Película de Ficción Temática";return "Maratón Especial: Bloque de Series Clásicas";}if (numDial >= 300 && numDial < 400) {return "Retransmisión Polideportiva en Vivo y Entrevistas";}if (numDial >= 500 && numDial < 600) {return "Zona Infantil: Animación Continua 24h";}return "Emisión Lineal Oficial Continua";}// Función para cambiar de canal e iluminar la tarjeta de la cintafunction playChannel(url, name, logo, dial) {const epgText = generateEPG(name, dial);// Actualizar textos informativos de la tarjeta centraldocument.getElementById('now-dial-name').innerText = Dial ${dial} • ${name};document.getElementById('now-logo').src = logo;document.getElementById('now-program').innerText = epgText;// Cambiar iluminación en la cinta horizontaldocument.querySelectorAll('.dial-card').forEach(card => card.classList.remove('active'));const selectedCard = document.getElementById(card-${dial});if (selectedCard) {selectedCard.classList.add('active');// Centrar automáticamente el canal seleccionado en el scroll horizontalselectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });}// Arrancar el streaming de videoif (typeof Hls !== 'undefined' && Hls.isSupported()) {if (hlsInstance) hlsInstance.destroy();hlsInstance = new Hls();hlsInstance.loadSource(url);hlsInstance.attachMedia(video);hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {video.play().catch(e => console.log("Interacción requerida"));});} else if (video.canPlayType('application/vnd.apple.mpegurl')) {video.src = url;video.play().catch(e => console.log("Error de reproducción"));}}// Lector instantáneo del archivo m3u localasync function loadTVCOM() {try {const response = await fetch(m3uUrl);if (!response.ok) throw new Error("Falta lista.m3u");const text = await response.text();const lines = text.split('\n');let channels = [];let currentChannel = null;for (let i = 0; i < lines.length; i++) {const line = lines[i].trim();if (line.startsWith('#EXTINF:')) {const chnoMatch = line.match(/tvg-chno="([^"]+)"/);const logoMatch = line.match(/tvg-logo="([^"]+)"/);const nameParts = line.split(',');const name = nameParts[nameParts.length - 1].trim();currentChannel = {dial: chnoMatch ? chnoMatch[1] : (channels.length + 101),logo: logoMatch ? logoMatch[1] : 'placeholder.com',name: name};} else if (line.startsWith('http') && currentChannel) {currentChannel.url = line;channels.push(currentChannel);currentChannel = null;}}trackContainer.innerHTML = '';// Construir la cinta de canales horizontalchannels.forEach((channel, index) => {const epgInfo = generateEPG(channel.name, channel.dial);const card = document.createElement('div');card.className = 'dial-card';card.id = card-${channel.dial};card.innerHTML = <div class="dial-num">${channel.dial}</div> <img class="card-thumb" src="${channel.logo}" onerror="this.src='https://placeholder.com'"> <div class="card-info"> <div class="card-ch-name">${channel.name}</div> <div class="card-epg-info">${epgInfo}</div> </div>;card.addEventListener('click', () => playChannel(channel.url, channel.name, channel.logo, channel.dial));trackContainer.appendChild(card);// Sintonización inicial del primer canal de la listaif (index === 0) {playChannel(channel.url, channel.name, channel.logo, channel.dial);}});} catch (error) {trackContainer.innerHTML = 'Error: Sube tu archivo lista.m3u al repositorio.';console.error(error);}}// Lanzamiento simultáneostartClock();window.addEventListener('DOMContentLoaded', loadTVCOM);
