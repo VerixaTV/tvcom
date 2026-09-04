@@ -1,22 +1,12 @@
-#EXTM3U
+#EXTM3U url-tvg="https://www.open-epg.com/files/spain.xml"
 
-#EXTINF:-1 tvg-chno="101" tvg-id="EuronewsEs" tvg-logo="https://githubusercontent.com",Euronews Español
-https://wurl.tv
-
-#EXTINF:-1 tvg-chno="102" tvg-id="DWespanol" tvg-logo="https://githubusercontent.com",DW Español
-https://akamaized.net
-
-#EXTINF:-1 tvg-chno="201" tvg-id="RuntimeCine" tvg-logo="https://githubusercontent.com",Runtime Cine
-https://amagi.tv
-
-#EXTINF:-1 tvg-chno="202" tvg-id="RuntimeTerror" tvg-logo="https://githubusercontent.com",Runtime Terror
-https://amagi.tv
-
-#EXTINF:-1 tvg-chno="301" tvg-id="RedBullTV" tvg-logo="https://githubusercontent.com",Red Bull TV
-https://akamaized.net
-
-#EXTINF:-1 tvg-chno="401" tvg-id="NasaTV" tvg-logo="https://githubusercontent.com",NASA TV
-https://akamaized.net
-
-#EXTINF:-1 tvg-chno="501" tvg-id="Pocoyo" tvg-logo="https://githubusercontent.com",Pocoyó 24h
-https://amagi.tv
+#EXTINF:-1 tvg-chno="100" tvg-id="24Horas.es" tvg-logo="https://i.ibb.co/21sXZ3GT/24h.png" group-title="Bloque 100 | Generalistas y Noticias",24 Horas
+https://rtvelivestream.rtve.es/rtvesec/24h/24h_main_dvr.m3u8
+#EXTINF:-1 tvg-chno="103" tvg-id="324.es" group-title="Bloque 100 | Generalistas y Noticias",3/24
+https://directes-tv-int.3catdirectes.cat/live-content/canal324-hls/master.m3u8
+#EXTINF:-1 tvg-chno="701" tvg-id="7TVRegionMurcia.es" group-title="Bloque 700 | Autonómicas y Locales de España",7 TV Region de Murcia
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (X11; Linux x86_64; rv:154.0) Gecko/20100101 Firefox/154.0
+#EXTVLCOPT:http-referrer=https://www.la7tv.es/
+https://rtv-murcia-live.globalmest.com/principal/smil:principal.smil/playlist.m3u8
+#EXTINF:-1 tvg-chno="802" tvg-id="2M.es" group-title="Bloque 800 | Internacionales",2M
+https://d2qh3gh0k5vp3v.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-n6pess5lwbghr/2M_ES.m3u8
