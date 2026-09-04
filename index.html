@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TVCOM - Experiencia de Televisión Inmersiva</title>
+    <title>TVCOM - Televisión Pura</title>
+
+    <!-- Cargamos los iconos minimalistas y estables desde CDN -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+
     <style>
         :root {
-            --glow-color: #ff002b;
-            --glass-bg: rgba(20, 20, 30, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #ffffff;
-            --text-sec: #a1a1aa;
+            --glass-bg: rgba(10, 10, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --accent: #ff002b;
         }
 
         body, html {
@@ -18,392 +20,422 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #050508;
-            color: var(--text-main);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #000;
+            color: #fff;
+            font-family: system-ui, -apple-system, sans-serif;
             overflow: hidden;
+            user-select: none;
         }
 
-        /* CABECERA FLOTANTE */
-        .brand-header {
+        /* REPRODUCTOR A PANTALLA COMPLETA TOTAL */
+        .fullscreen-theater {
             position: absolute;
-            top: 25px;
-            left: 35px;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand-logo {
-            font-size: 26px;
-            font-weight: 900;
-            letter-spacing: 4px;
-            background: linear-gradient(45deg, #ff002b, #ff6b81);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(255, 0, 43, 0.3);
-        }
-
-        .badge-live {
-            background: rgba(255, 0, 43, 0.2);
-            border: 1px solid var(--glow-color);
-            color: #ff3355;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 0 10px rgba(255, 0, 43, 0.2);
-        }
-
-        /* CONTENEDOR TEATRO */
-        .theater-container {
-            position: relative;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 2;
-            box-sizing: border-box;
-            padding-bottom: 160px;
-        }
-
-        .screen-wrapper {
-            position: relative;
-            width: 60%;
-            aspect-ratio: 16/9;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8), 0 0 80px rgba(255, 0, 43, 0.1);
-            border: 1px solid var(--glass-border);
-            transition: all 0.4s ease;
+            z-index: 1;
         }
 
         video {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover; /* Cambia a contain si prefieres barras negras laterales */
         }
 
-        /* TARJETA INFORMATIVA */
-        .info-card {
-            margin-top: 25px;
-            width: 60%;
+        /* BOTONES FLOTANTES DE ZAPEO (FLECHAS TRANSPARENTES) */
+        .zap-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            color: rgba(255, 255, 255, 0.6);
+            width: 50px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .zap-btn:hover {
+            background: rgba(255, 0, 43, 0.3);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 43, 0.2);
+        }
+
+        #zap-next {
+            right: 0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        /* BOTÓN DE MENÚ MÁSTER */
+        .menu-trigger {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            z-index: 5;
             background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .menu-trigger:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        /* BANNER INFORMATIVO TEMPORAL (OSD DE ZAPEO) */
+        .channel-overlay-banner {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(30px);
+            z-index: 6;
+            background: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 15px 25px;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .meta-left {
+            padding: 15px 30px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             gap: 20px;
-            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        .meta-logo {
+        .channel-overlay-banner.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .overlay-logo {
             width: 50px;
             height: 50px;
             object-fit: contain;
-            background: rgba(0,0,0,0.4);
-            border-radius: 8px;
-            padding: 5px;
-            border: 1px solid rgba(255,255,255,0.05);
-            flex-shrink: 0;
+            background: #000;
+            border-radius: 6px;
+            padding: 4px;
         }
 
-        .meta-text {
-            overflow: hidden;
+        .overlay-num {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--accent);
         }
 
-        .meta-text .channel-title {
-            font-size: 12px;
-            color: #ff3355;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
-        }
-
-        .meta-text .program-title {
+        .overlay-title {
             font-size: 18px;
-            font-weight: bold;
-            color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-weight: 700;
         }
 
-        .clock-live {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-sec);
-            background: rgba(255,255,255,0.05);
-            padding: 5px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--glass-border);
-            flex-shrink: 0;
-        }
-
-        /* CINTA DE DIALES HORIZONTAL INFERIOR */
-        .carousel-section {
+        /* LISTA LATERAL TRANSLÚCIDA Y RÁPIDA */
+        .side-panel {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 160px;
-            background: linear-gradient(to top, #050508 80%, rgba(5,5,8,0));
-            z-index: 5;
+            top: 0;
+            right: -350px;
+            width: 330px;
+            height: 100%;
+            background: rgba(8, 8, 12, 0.75);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-left: 1px solid var(--glass-border);
+            z-index: 10;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
-            align-items: center;
-            padding: 0 40px;
+            flex-direction: column;
             box-sizing: border-box;
+            padding: 30px 20px;
         }
 
-        .carousel-track {
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-header {
             display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            width: 100%;
-            padding: 15px 0;
-            scroll-behavior: smooth;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
         }
 
-        .carousel-track::-webkit-scrollbar {
-            height: 5px;
+        .panel-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
         }
 
-        .carousel-track::-webkit-scrollbar-thumb {
-            background: rgba(255, 0, 43, 0.4);
-            border-radius: 10px;
+        .close-panel {
+            cursor: pointer;
+            font-size: 18px;
+            color: rgba(255,255,255,0.5);
         }
 
-        .dial-card {
-            flex: 0 0 240px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px 15px;
+        .channel-list-scroller {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .channel-list-scroller::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .channel-list-scroller::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .list-row {
             display: flex;
             align-items: center;
             gap: 15px;
+            padding: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.25s ease;
-            user-select: none;
-            overflow: hidden;
+            border: 1px solid transparent;
+            transition: all 0.2s;
         }
 
-        .dial-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 0, 43, 0.4);
+        .list-row:hover {
+            background: rgba(255,255,255,0.05);
         }
 
-        .dial-card.active {
-            background: rgba(255, 0, 43, 0.12);
-            border-color: var(--glow-color);
-            box-shadow: 0 0 25px rgba(255, 0, 43, 0.2);
+        .list-row.active {
+            background: rgba(255, 0, 43, 0.1);
+            border-color: var(--accent);
         }
 
-        .dial-num {
-            font-size: 22px;
-            font-weight: 800;
-            color: rgba(255,255,255,0.12);
+        .list-num {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.3);
+            width: 30px;
         }
 
-        .dial-card.active .dial-num {
-            color: #ff3355;
+        .list-row.active .list-num {
+            color: var(--accent);
         }
 
-        .card-thumb {
-            width: 45px;
-            height: 45px;
+        .list-logo {
+            width: 35px;
+            height: 35px;
             object-fit: contain;
             background: #000;
-            border-radius: 6px;
-            padding: 3px;
-            flex-shrink: 0;
+            border-radius: 4px;
+            padding: 2px;
         }
 
-        .card-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .card-ch-name {
-            font-weight: bold;
+        .list-name {
             font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .card-epg-info {
-            font-size: 12px;
-            color: var(--text-sec);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 2px;
-        }
-
-        @media (max-width: 1024px) {
-            .screen-wrapper, .info-card {
-                width: 90%;
-            }
+            font-weight: 600;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="brand-header">
-        <div class="brand-logo">TVCOM</div>
-        <div class="badge-live">En Directo</div>
+    <!-- REPRODUCTOR MÁSTER -->
+    <div class="fullscreen-theater">
+        <video id="video" controls autoplay muted></video>
     </div>
 
-    <div class="theater-container">
-        <div class="screen-wrapper">
-            <video id="video" controls autoplay muted></video>
-        </div>
+    <!-- CONTROLES TRANSPARENTES FLOTANTES -->
+    <div class="zap-btn" id="zap-prev">
+        <i class="fa-solid fa-chevron-left"></i>
+    </div>
 
-        <div class="info-card">
-            <div class="meta-left">
-                <img id="now-logo" class="meta-logo" src="https://placeholder.com" alt="Logo">
-                <div class="meta-text">
-                    <div id="now-dial-name" class="channel-title">Sintonizando...</div>
-                    <div id="now-program" class="program-title">Cargando canales de TVCOM...</div>
-                </div>
+    <div class="zap-btn" id="zap-next">
+        <i class="fa-solid fa-chevron-right"></i>
+    </div>
+
+    <div class="menu-trigger" id="open-menu">
+        <i class="fa-solid fa-bars"></i>
+    </div>
+
+    <!-- BANNER TEMPORAL DE ZAPEO (OSD) -->
+    <div class="channel-overlay-banner" id="osd">
+        <div class="overlay-num" id="osd-num">101</div>
+
+        <img
+            class="overlay-logo"
+            id="osd-logo"
+            src=""
+            alt="logo"
+        >
+
+        <div class="overlay-title" id="osd-name">
+            Canal
+        </div>
+    </div>
+
+    <!-- MENÚ LATERAL TRANSLÚCIDO -->
+    <div class="side-panel" id="panel">
+
+        <div class="panel-header">
+            <h2>TVCOM</h2>
+
+            <div class="close-panel" id="close-menu">
+                <i class="fa-solid fa-xmark"></i>
             </div>
-            <div class="clock-live" id="live-clock">00:00:00</div>
         </div>
+
+        <div class="channel-list-scroller" id="box-list">
+            <!-- Listas dinámicas -->
+        </div>
+
     </div>
 
-    <div class="carousel-section">
-        <div id="carousel-track" class="carousel-track">
-            <!-- Diales dinámicos -->
-        </div>
-    </div>
-
-    <!-- CARGA DE SEGURIDAD RESPALDO: Motor integrado directo y rápido de cdnjs libre de fallos -->
+    <!-- Enlace directo al motor de streaming rápido desde CDN estable -->
     <script src="https://cloudflare.com"></script>
 
     <script>
         const m3uUrl = 'lista.m3u';
         const video = document.getElementById('video');
-        const trackContainer = document.getElementById('carousel-track');
+
+        let channels = [];
+        let currentIndex = 0;
         let hlsInstance = null;
+        let osdTimeout = null;
 
-        function startClock() {
-            setInterval(() => {
-                document.getElementById('live-clock').innerText =
-                    new Date().toLocaleTimeString();
-            }, 1000);
-        }
+        // Mostrar OSD temporal al cambiar de canal
+        function triggerOSD(channel) {
+            document.getElementById('osd-num').innerText =
+                channel.dial;
 
-        function generateEPG(name, dial) {
-            const hora = new Date().getHours();
-            const numDial = parseInt(dial);
+            document.getElementById('osd-logo').src =
+                channel.logo;
 
-            if (numDial >= 100 && numDial < 200) {
-                if (hora >= 6 && hora < 14)
-                    return "Informativo Matinal de Actualidad";
+            document.getElementById('osd-name').innerText =
+                channel.name;
 
-                if (hora >= 14 && hora < 20)
-                    return "Conexión en Directo y Debate de Tarde";
+            const osd = document.getElementById('osd');
 
-                return "Telediario Nocturno y Crónica de Cierre";
-            }
+            osd.classList.add('show');
 
-            if (numDial >= 200 && numDial < 300)
-                return "Cine: Película de Ficción Temática [24/7]";
+            clearTimeout(osdTimeout);
 
-            if (numDial >= 300 && numDial < 400)
-                return "Retransmisión Deportiva y Entrevistas";
-
-            return "Emisión Lineal Oficial Continua";
-        }
-
-        function playChannel(url, name, logo, dial) {
-            const epgText = generateEPG(name, dial);
-
-            document.getElementById('now-dial-name').innerText =
-                `Dial ${dial} • ${name}`;
-
-            document.getElementById('now-logo').src = logo;
-            document.getElementById('now-program').innerText = epgText;
-
-            document.querySelectorAll('.dial-card').forEach(card =>
-                card.classList.remove('active')
+            osdTimeout = setTimeout(
+                () => osd.classList.remove('show'),
+                3000
             );
+        }
 
-            const selectedCard = document.getElementById(`card-${dial}`);
+        // Sintonizar Canal
+        function sintonizar(index) {
+            if (channels.length === 0) return;
 
-            if (selectedCard) {
-                selectedCard.classList.add('active');
-
-                selectedCard.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest',
-                    inline: 'center'
-                });
+            if (index < 0) {
+                index = channels.length - 1;
             }
 
-            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                if (hlsInstance) hlsInstance.destroy();
+            if (index >= channels.length) {
+                index = 0;
+            }
+
+            currentIndex = index;
+
+            const channel = channels[currentIndex];
+
+            triggerOSD(channel);
+
+            // Marcar activo en el menú lateral
+            document
+                .querySelectorAll('.list-row')
+                .forEach(r => r.classList.remove('active'));
+
+            const activeRow =
+                document.getElementById(`row-${channel.dial}`);
+
+            if (activeRow) {
+                activeRow.classList.add('active');
+            }
+
+            // Carga y reproducción de flujo hls (.m3u8)
+            if (
+                typeof Hls !== 'undefined' &&
+                Hls.isSupported()
+            ) {
+                if (hlsInstance) {
+                    hlsInstance.destroy();
+                }
 
                 hlsInstance = new Hls();
-                hlsInstance.loadSource(url);
+
+                hlsInstance.loadSource(channel.url);
                 hlsInstance.attachMedia(video);
 
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () =>
-                    video.play().catch(() => {})
+                hlsInstance.on(
+                    Hls.Events.MANIFEST_PARSED,
+                    () => video.play().catch(() => {})
                 );
 
             } else if (
-                video.canPlayType('application/vnd.apple.mpegurl')
+                video.canPlayType(
+                    'application/vnd.apple.mpegurl'
+                )
             ) {
-                video.src = url;
+                video.src = channel.url;
+
                 video.play().catch(() => {});
             }
         }
 
+        // Parseador del M3U local
         async function loadTVCOM() {
             try {
                 const response = await fetch(m3uUrl);
+
                 const text = await response.text();
+
                 const lines = text.split('\n');
 
-                let channels = [];
                 let currentChannel = null;
 
-                for (let i = 0; i < lines.length; i++) {
+                for (
+                    let i = 0;
+                    i < lines.length;
+                    i++
+                ) {
                     const line = lines[i].trim();
 
                     if (line.startsWith('#EXTINF:')) {
+
                         const chnoMatch =
-                            line.match(/tvg-chno="([^"]+)"/);
+                            line.match(
+                                /tvg-chno="([^"]+)"/
+                            );
 
                         const logoMatch =
-                            line.match(/tvg-logo="([^"]+)"/);
+                            line.match(
+                                /tvg-logo="([^"]+)"/
+                            );
 
-                        const nameParts = line.split(',');
-                        const name =
-                            nameParts[nameParts.length - 1].trim();
+                        const nameParts =
+                            line.split(',');
 
                         currentChannel = {
                             dial: chnoMatch
@@ -414,7 +446,9 @@
                                 ? logoMatch[1]
                                 : 'placeholder.com',
 
-                            name: name
+                            name: nameParts[
+                                nameParts.length - 1
+                            ].trim()
                         };
 
                     } else if (
@@ -422,77 +456,104 @@
                         currentChannel
                     ) {
                         currentChannel.url = line;
+
                         channels.push(currentChannel);
+
                         currentChannel = null;
                     }
                 }
 
-                trackContainer.innerHTML = '';
+                // Generar los elementos del menú lateral
+                const boxList =
+                    document.getElementById('box-list');
 
-                channels.forEach((channel, index) => {
-                    const epgInfo =
-                        generateEPG(
-                            channel.name,
-                            channel.dial
-                        );
+                boxList.innerHTML = '';
 
-                    const card =
+                channels.forEach((channel, idx) => {
+
+                    const row =
                         document.createElement('div');
 
-                    card.className = 'dial-card';
+                    row.className = 'list-row';
 
-                    card.id = `card-${channel.dial}`;
+                    row.id =
+                        `row-${channel.dial}`;
 
-                    card.innerHTML = `
-                        <div class="dial-num">
+                    row.innerHTML = `
+                        <div class="list-num">
                             ${channel.dial}
                         </div>
 
                         <img
-                            class="card-thumb"
+                            class="list-logo"
                             src="${channel.logo}"
                             onerror="this.src='https://placeholder.com'"
                         >
 
-                        <div class="card-info">
-                            <div class="card-ch-name">
-                                ${channel.name}
-                            </div>
-
-                            <div class="card-epg-info">
-                                ${epgInfo}
-                            </div>
+                        <div class="list-name">
+                            ${channel.name}
                         </div>
                     `;
 
-                    card.addEventListener('click', () =>
-                        playChannel(
-                            channel.url,
-                            channel.name,
-                            channel.logo,
-                            channel.dial
-                        )
+                    row.addEventListener(
+                        'click',
+                        () => {
+                            sintonizar(idx);
+
+                            document
+                                .getElementById('panel')
+                                .classList.remove('open');
+                        }
                     );
 
-                    trackContainer.appendChild(card);
-
-                    if (index === 0) {
-                        playChannel(
-                            channel.url,
-                            channel.name,
-                            channel.logo,
-                            channel.dial
-                        );
-                    }
+                    boxList.appendChild(row);
                 });
 
-            } catch (error) {
-                trackContainer.innerHTML =
-                    'Error al enlazar lista.m3u';
+                // Carga inicial
+                sintonizar(0);
+
+            } catch (e) {
+                console.error(
+                    "Error cargando el catálogo.",
+                    e
+                );
             }
         }
 
-        startClock();
+        // Eventos de interfaz interactiva
+        document
+            .getElementById('zap-prev')
+            .addEventListener(
+                'click',
+                () => sintonizar(currentIndex - 1)
+            );
+
+        document
+            .getElementById('zap-next')
+            .addEventListener(
+                'click',
+                () => sintonizar(currentIndex + 1)
+            );
+
+        document
+            .getElementById('open-menu')
+            .addEventListener(
+                'click',
+                () =>
+                    document
+                        .getElementById('panel')
+                        .classList.add('open')
+            );
+
+        document
+            .getElementById('close-menu')
+            .addEventListener(
+                'click',
+                () =>
+                    document
+                        .getElementById('panel')
+                        .classList.remove('open')
+            );
 
         window.addEventListener(
             'DOMContentLoaded',
