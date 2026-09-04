@@ -23,6 +23,7 @@
             user-select: none;
         }
 
+        /* CONTENEDOR CONTROLES Y VIDEO */
         .fullscreen-theater {
             position: absolute;
             top: 0;
@@ -38,6 +39,88 @@
             object-fit: cover;
         }
 
+        /* CONTROLES PERSONALIZADOS PROPIOS DEL PLAYER */
+        .custom-player-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0));
+            z-index: 8;
+            padding: 20px 40px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            opacity: 0; /* Ocultos por defecto */
+            transition: opacity 0.3s ease;
+        }
+
+        /* Mostrar controles al mover el ratón sobre el teatro */
+        .fullscreen-theater:hover .custom-player-controls {
+            opacity: 1;
+        }
+
+        .player-ctrl-left, .player-ctrl-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .player-icon-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .player-icon-btn:hover {
+            color: var(--accent);
+        }
+
+        .player-icon-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        /* Barra de volumen estilizada */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 80px;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* BOTONES FLOTANTES DE ZAPEO (FLECHAS TRANSPARENTES) */
         .zap-btn {
             position: absolute;
             top: 50%;
@@ -56,6 +139,10 @@
             cursor: pointer;
             transition: all 0.2s ease;
             border-radius: 0 10px 10px 0;
+            opacity: 0;
+        }
+        .fullscreen-theater:hover ~ .zap-btn, .zap-btn:hover {
+            opacity: 1;
         }
         .zap-btn:hover {
             background: rgba(255, 0, 43, 0.35);
@@ -88,6 +175,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            opacity: 0;
+        }
+        .fullscreen-theater:hover ~ .menu-trigger, .menu-trigger:hover {
+            opacity: 1;
         }
         .menu-trigger:hover {
             background: rgba(255, 255, 255, 0.15);
@@ -102,7 +193,7 @@
 
         .channel-overlay-banner {
             position: absolute;
-            bottom: 40px;
+            bottom: 90px; /* Subido un poco para no chocar con la barra del player */
             left: 50%;
             transform: translateX(-50%) translateY(30px);
             z-index: 6;
@@ -197,12 +288,38 @@
 
 <body>
 
-    <!-- REPRODUCTOR MÁSTER A PANTALLA COMPLETA -->
-    <div class="fullscreen-theater">
-        <video id="video" controls autoplay muted></video>
+    <!-- REPRODUCTOR MÁSTER A PANTALLA COMPLETA CON CONTROLES NATIVOS OCULTOS -->
+    <div class="fullscreen-theater" id="theater">
+        <video id="video" autoplay muted></video>
+
+        <!-- NUEVA BARRA DE CONTROLES FLOTANTE Y STYLISH -->
+        <div class="custom-player-controls">
+            <div class="player-ctrl-left">
+                <!-- Botón Play / Pausa -->
+                <button class="player-icon-btn" id="play-pause-btn">
+                    <svg id="play-icon" viewBox="0 0 24 24" style="display:none;"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <!-- Control de Volumen -->
+                <div class="volume-container">
+                    <button class="player-icon-btn" id="mute-btn">
+                        <svg id="volume-on-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                        <svg id="volume-off-icon" viewBox="0 0 24 24" style="display:none;"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                    </button>
+                    <input type="range" class="volume-slider" id="volume-bar" min="0" max="1" step="0.1" value="0">
+                </div>
+            </div>
+
+            <div class="player-ctrl-right">
+                <!-- Botón Pantalla Completa Nativa -->
+                <button class="player-icon-btn" id="full-screen-btn">
+                    <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- CONTROLES SVGS NATIVOS PARA EL ZAPEO -->
+    <!-- BOTONES FLOTANTES DE ZAPEO -->
     <div class="zap-btn" id="zap-prev">
         <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
     </div>
@@ -210,19 +327,19 @@
         <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
     </div>
     
-    <!-- BOTÓN SUPERIOR PARA DESPLEGAR EL MENÚ -->
+    <!-- BOTÓN DE MENÚ -->
     <div class="menu-trigger" id="open-menu">
         <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
     </div>
 
-    <!-- BANNER TEMPORAL INFORMATIVO (OSD) -->
+    <!-- BANNER TEMPORAL DE ZAPEO (OSD) -->
     <div class="channel-overlay-banner" id="osd">
         <div class="overlay-num" id="osd-num">---</div>
-        <img class="overlay-logo" id="osd-logo" src="https://placeholder.com" alt="logo">
+        <div id="osd-logo-box"></div>
         <div class="overlay-title" id="osd-name">Cargando...</div>
     </div>
 
-    <!-- MENÚ LATERAL TRASLÚCIDO -->
+    <!-- MENÚ LATERAL TRANSLÚCIDO -->
     <div class="side-panel" id="panel">
         <div class="panel-header">
             <h2>TVCOM</h2>
@@ -239,15 +356,85 @@
     <script>
         const m3uUrl = 'lista.m3u?v=' + Math.random();
         const video = document.getElementById('video');
+        const theater = document.getElementById('theater');
         let channels = [];
         let currentIndex = 0;
         let hlsInstance = null;
         let osdTimeout = null;
 
+        // CONTROLES DEL REPRODUCTOR PERSONALIZADO
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const muteBtn = document.getElementById('mute-btn');
+        const volumeOnIcon = document.getElementById('volume-on-icon');
+        const volumeOffIcon = document.getElementById('volume-off-icon');
+        const volumeBar = document.getElementById('volume-bar');
+        const fullScreenBtn = document.getElementById('full-screen-btn');
+
+        // Play y Pausa
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+            } else {
+                video.pause();
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+            }
+        });
+
+        // Mutear / Silenciar
+        muteBtn.addEventListener('click', () => {
+            video.muted = !video.muted;
+            if (video.muted) {
+                volumeOnIcon.style.display = 'none';
+                volumeOffIcon.style.display = 'block';
+                volumeBar.value = 0;
+            } else {
+                volumeOnIcon.style.display = 'block';
+                volumeOffIcon.style.display = 'none';
+                volumeBar.value = video.volume || 0.5;
+            }
+        });
+
+        // Control manual de la barra de volumen
+        volumeBar.addEventListener('input', (e) => {
+            video.volume = e.target.value;
+            if (video.volume == 0) {
+                video.muted = true;
+                volumeOnIcon.style.display = 'none';
+                volumeOffIcon.style.display = 'block';
+            } else {
+                video.muted = false;
+                volumeOnIcon.style.display = 'block';
+                volumeOffIcon.style.display = 'none';
+            }
+        });
+
+        // Pantalla completa nativa
+        fullScreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                if (theater.requestFullscreen) theater.requestFullscreen();
+                else if (theater.webkitRequestFullscreen) theater.webkitRequestFullscreen();
+                else if (theater.msRequestFullscreen) theater.msRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        });
+
+        // Banner informativo temporal (OSD)
         function triggerOSD(channel) {
             document.getElementById('osd-num').innerText = channel.dial;
-            document.getElementById('osd-logo').src = channel.logo;
             document.getElementById('osd-name').innerText = channel.name;
+            
+            const logoBox = document.getElementById('osd-logo-box');
+            if (channel.logo) {
+                logoBox.innerHTML = `<img class="overlay-logo" src="${channel.logo}" onerror="this.style.display='none'">`;
+            } else {
+                logoBox.innerHTML = '';
+            }
             
             const osd = document.getElementById('osd');
             osd.classList.add('show');
@@ -270,17 +457,30 @@
             const activeRow = document.getElementById(`row-${channel.dial}`);
             if (activeRow) activeRow.classList.add('active');
 
+            // Cargar streaming
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                 if (hlsInstance) hlsInstance.destroy();
                 hlsInstance = new Hls();
                 hlsInstance.loadSource(channel.url);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play().catch(e => console.log("Autoplay requiere click"));
+                    video.play().catch(() => {
+                        playIcon.style.display = 'block';
+                        pauseIcon.style.display = 'none';
+                    });
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = channel.url;
-                video.play().catch(() => {});
+                video.play().catch(() => {
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
+                });
+            }
+            
+            // Forzar actualización del estado de los botones visuales
+            if (!video.paused) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
             }
         }
 
@@ -326,7 +526,7 @@
                 boxList.innerHTML = '';
                 
                 if (channels.length === 0) {
-                    boxList.innerHTML = '<div style="padding:20px;color:#ff3355;">Sin canales</div>';
+                    boxList.innerHTML = '<div style="padding:20px;color:#ff3355;">Sin canales cargados.</div>';
                     return;
                 }
 
@@ -335,7 +535,6 @@
                     row.className = 'list-row';
                     row.id = `row-${channel.dial}`;
                     
-                    // Si no hay logo, ponemos un cuadro de texto minimalista con las iniciales
                     const logoHtml = channel.logo ? 
                         `<img class="list-logo" src="${channel.logo}" onerror="this.style.display='none'">` : 
                         `<div class="list-logo" style="display:flex;align-items:center;justify-content:center;background:#222;font-size:10px;font-weight:bold;">TV</div>`;
@@ -352,10 +551,15 @@
                     boxList.appendChild(row);
                 });
 
+                // Iniciar primer canal silenciado por política del navegador (el usuario activa el audio desde el control)
+                video.muted = true;
+                volumeBar.value = 0;
+                volumeOnIcon.style.display = 'none';
+                volumeOffIcon.style.display = 'block';
                 sintonizar(0);
 
             } catch (e) {
-                document.getElementById('box-list').innerHTML = '<div style="padding:20px;color:#ff3355;">Error</div>';
+                document.getElementById('box-list').innerHTML = '<div style="padding:20px;color:#ff3355;">Error de carga</div>';
                 console.error(e);
             }
         }
