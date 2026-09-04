@@ -1,565 +1,609 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TVCOM - Televisión Pura</title>
 
-    <!-- Cargamos los iconos minimalistas y estables desde CDN -->
-    <link rel="stylesheet" href="https://cloudflare.com">
+```
+<style>
+    :root {
+        --glass-bg: rgba(10, 10, 15, 0.5);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --accent: #ff002b;
+    }
 
-    <style>
-        :root {
-            --glass-bg: rgba(10, 10, 15, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.06);
-            --accent: #ff002b;
-        }
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        color: #fff;
+        font-family: system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+        user-select: none;
+    }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            color: #fff;
-            font-family: system-ui, -apple-system, sans-serif;
-            overflow: hidden;
-            user-select: none;
-        }
+    /* REPRODUCTOR A PANTALLA COMPLETA TOTAL */
+    .fullscreen-theater {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
 
-        /* REPRODUCTOR A PANTALLA COMPLETA TOTAL */
-        .fullscreen-theater {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Cambia a contain si prefieres barras negras laterales */
-        }
+    /* BOTONES FLOTANTES DE ZAPEO */
+    .zap-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        color: rgba(255, 255, 255, 0.7);
+        width: 55px;
+        height: 75px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-radius: 0 10px 10px 0;
+    }
 
-        /* BOTONES FLOTANTES DE ZAPEO (FLECHAS TRANSPARENTES) */
-        .zap-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 5;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--glass-border);
-            color: rgba(255, 255, 255, 0.6);
-            width: 50px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-radius: 0 8px 8px 0;
-        }
+    .zap-btn:hover {
+        background: rgba(255, 0, 43, 0.3);
+        color: #fff;
+        box-shadow: 0 0 20px rgba(255, 0, 43, 0.3);
+    }
 
-        .zap-btn:hover {
-            background: rgba(255, 0, 43, 0.3);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(255, 0, 43, 0.2);
-        }
+    .zap-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
 
-        #zap-next {
-            right: 0;
-            border-radius: 8px 0 0 8px;
-        }
+    #zap-next {
+        right: 0;
+        border-radius: 10px 0 0 10px;
+    }
 
-        /* BOTÓN DE MENÚ MÁSTER */
-        .menu-trigger {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            z-index: 5;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
+    /* BOTÓN DE MENÚ MÁSTER */
+    .menu-trigger {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        z-index: 5;
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        color: white;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
 
-        .menu-trigger:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(90deg);
-        }
+    .menu-trigger:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--accent);
+        transform: rotate(90deg);
+    }
 
-        /* BANNER INFORMATIVO TEMPORAL (OSD DE ZAPEO) */
-        .channel-overlay-banner {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%) translateY(30px);
-            z-index: 6;
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 15px 30px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
+    .menu-trigger svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+    }
 
-        .channel-overlay-banner.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
+    /* BANNER INFORMATIVO TEMPORAL */
+    .channel-overlay-banner {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%) translateY(30px);
+        z-index: 6;
+        background: rgba(10, 10, 15, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        padding: 15px 35px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
 
-        .overlay-logo {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            background: #000;
-            border-radius: 6px;
-            padding: 4px;
-        }
+    .channel-overlay-banner.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 
-        .overlay-num {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--accent);
-        }
+    .overlay-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        background: #000;
+        border-radius: 6px;
+        padding: 4px;
+    }
 
-        .overlay-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
+    .overlay-num {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--accent);
+    }
 
-        /* LISTA LATERAL TRANSLÚCIDA Y RÁPIDA */
-        .side-panel {
-            position: absolute;
-            top: 0;
-            right: -350px;
-            width: 330px;
-            height: 100%;
-            background: rgba(8, 8, 12, 0.75);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-left: 1px solid var(--glass-border);
-            z-index: 10;
-            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            padding: 30px 20px;
-        }
+    .overlay-title {
+        font-size: 18px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
 
-        .side-panel.open {
-            right: 0;
-        }
+    /* LISTA LATERAL TRANSLÚCIDA */
+    .side-panel {
+        position: absolute;
+        top: 0;
+        right: -360px;
+        width: 340px;
+        height: 100%;
+        background: rgba(8, 8, 12, 0.8);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border-left: 1px solid var(--glass-border);
+        z-index: 10;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        padding: 30px 20px;
+    }
 
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
+    .side-panel.open {
+        right: 0;
+    }
 
-        .panel-header h2 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
 
-        .close-panel {
-            cursor: pointer;
-            font-size: 18px;
-            color: rgba(255,255,255,0.5);
-        }
+    .panel-header h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: var(--accent);
+    }
 
-        .channel-list-scroller {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    .close-panel {
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.6);
+        display: flex;
+        align-items: center;
+    }
 
-        .channel-list-scroller::-webkit-scrollbar {
-            width: 3px;
-        }
+    .close-panel svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+    }
 
-        .channel-list-scroller::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1);
-        }
+    .channel-list-scroller {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
 
-        .list-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-        }
+    .channel-list-scroller::-webkit-scrollbar {
+        width: 4px;
+    }
 
-        .list-row:hover {
-            background: rgba(255,255,255,0.05);
-        }
+    .channel-list-scroller::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 4px;
+    }
 
-        .list-row.active {
-            background: rgba(255, 0, 43, 0.1);
-            border-color: var(--accent);
-        }
+    .list-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+    }
 
-        .list-num {
-            font-size: 14px;
-            font-weight: 700;
-            color: rgba(255,255,255,0.3);
-            width: 30px;
-        }
+    .list-row:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
 
-        .list-row.active .list-num {
-            color: var(--accent);
-        }
+    .list-row.active {
+        background: rgba(255, 0, 43, 0.15);
+        border-color: var(--accent);
+    }
 
-        .list-logo {
-            width: 35px;
-            height: 35px;
-            object-fit: contain;
-            background: #000;
-            border-radius: 4px;
-            padding: 2px;
-        }
+    .list-num {
+        font-size: 14px;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.25);
+        width: 32px;
+        text-align: center;
+    }
 
-        .list-name {
-            font-size: 14px;
-            font-weight: 600;
-        }
-    </style>
+    .list-row.active .list-num {
+        color: var(--accent);
+    }
+
+    .list-logo {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        background: #000;
+        border-radius: 6px;
+        padding: 3px;
+    }
+
+    .list-name {
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+```
+
 </head>
 
 <body>
 
-    <!-- REPRODUCTOR MÁSTER -->
-    <div class="fullscreen-theater">
-        <video id="video" controls autoplay muted></video>
+```
+<!-- REPRODUCTOR MÁSTER -->
+<div class="fullscreen-theater">
+    <video id="video" controls autoplay muted></video>
+</div>
+
+<!-- CONTROLES -->
+<div class="zap-btn" id="zap-prev">
+    <svg viewBox="0 0 24 24">
+        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+    </svg>
+</div>
+
+<div class="zap-btn" id="zap-next">
+    <svg viewBox="0 0 24 24">
+        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+    </svg>
+</div>
+
+<div class="menu-trigger" id="open-menu">
+    <svg viewBox="0 0 24 24">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+    </svg>
+</div>
+
+<!-- BANNER DE INFORMACIÓN -->
+<div class="channel-overlay-banner" id="osd">
+    <div class="overlay-num" id="osd-num">---</div>
+
+    <img
+        class="overlay-logo"
+        id="osd-logo"
+        src="https://placeholder.com"
+        alt="logo"
+    >
+
+    <div class="overlay-title" id="osd-name">
+        Cargando canal...
     </div>
+</div>
 
-    <!-- CONTROLES TRANSPARENTES FLOTANTES -->
-    <div class="zap-btn" id="zap-prev">
-        <i class="fa-solid fa-chevron-left"></i>
-    </div>
+<!-- MENÚ LATERAL -->
+<div class="side-panel" id="panel">
 
-    <div class="zap-btn" id="zap-next">
-        <i class="fa-solid fa-chevron-right"></i>
-    </div>
+    <div class="panel-header">
+        <h2>TVCOM</h2>
 
-    <div class="menu-trigger" id="open-menu">
-        <i class="fa-solid fa-bars"></i>
-    </div>
-
-    <!-- BANNER TEMPORAL DE ZAPEO (OSD) -->
-    <div class="channel-overlay-banner" id="osd">
-        <div class="overlay-num" id="osd-num">101</div>
-
-        <img
-            class="overlay-logo"
-            id="osd-logo"
-            src=""
-            alt="logo"
-        >
-
-        <div class="overlay-title" id="osd-name">
-            Canal
+        <div class="close-panel" id="close-menu">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
         </div>
     </div>
 
-    <!-- MENÚ LATERAL TRANSLÚCIDO -->
-    <div class="side-panel" id="panel">
-
-        <div class="panel-header">
-            <h2>TVCOM</h2>
-
-            <div class="close-panel" id="close-menu">
-                <i class="fa-solid fa-xmark"></i>
-            </div>
+    <div class="channel-list-scroller" id="box-list">
+        <div style="padding:20px; color:rgba(255,255,255,0.4);">
+            Sintonizando guía...
         </div>
-
-        <div class="channel-list-scroller" id="box-list">
-            <!-- Listas dinámicas -->
-        </div>
-
     </div>
 
-    <!-- Enlace directo al motor de streaming rápido desde CDN estable -->
-    <script src="https://cloudflare.com"></script>
+</div>
 
-    <script>
-        const m3uUrl = 'lista.m3u';
-        const video = document.getElementById('video');
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-        let channels = [];
-        let currentIndex = 0;
-        let hlsInstance = null;
-        let osdTimeout = null;
+<script>
+    const m3uUrl = 'lista.m3u';
+    const video = document.getElementById('video');
 
-        // Mostrar OSD temporal al cambiar de canal
-        function triggerOSD(channel) {
-            document.getElementById('osd-num').innerText =
-                channel.dial;
+    let channels = [];
+    let currentIndex = 0;
+    let hlsInstance = null;
+    let osdTimeout = null;
 
-            document.getElementById('osd-logo').src =
-                channel.logo;
+    function triggerOSD(channel) {
+        document.getElementById('osd-num').innerText =
+            channel.dial;
 
-            document.getElementById('osd-name').innerText =
-                channel.name;
+        document.getElementById('osd-logo').src =
+            channel.logo;
 
-            const osd = document.getElementById('osd');
+        document.getElementById('osd-name').innerText =
+            channel.name;
 
-            osd.classList.add('show');
+        const osd = document.getElementById('osd');
 
-            clearTimeout(osdTimeout);
+        osd.classList.add('show');
 
-            osdTimeout = setTimeout(
-                () => osd.classList.remove('show'),
-                3000
-            );
+        clearTimeout(osdTimeout);
+
+        osdTimeout = setTimeout(() => {
+            osd.classList.remove('show');
+        }, 3000);
+    }
+
+    function sintonizar(index) {
+        if (channels.length === 0) return;
+
+        if (index < 0) {
+            index = channels.length - 1;
         }
 
-        // Sintonizar Canal
-        function sintonizar(index) {
-            if (channels.length === 0) return;
+        if (index >= channels.length) {
+            index = 0;
+        }
 
-            if (index < 0) {
-                index = channels.length - 1;
+        currentIndex = index;
+
+        const channel = channels[currentIndex];
+
+        triggerOSD(channel);
+
+        document
+            .querySelectorAll('.list-row')
+            .forEach(row => row.classList.remove('active'));
+
+        const activeRow =
+            document.getElementById(`row-${channel.dial}`);
+
+        if (activeRow) {
+            activeRow.classList.add('active');
+        }
+
+        if (
+            typeof Hls !== 'undefined' &&
+            Hls.isSupported()
+        ) {
+            if (hlsInstance) {
+                hlsInstance.destroy();
             }
 
-            if (index >= channels.length) {
-                index = 0;
-            }
+            hlsInstance = new Hls();
 
-            currentIndex = index;
+            hlsInstance.loadSource(channel.url);
 
-            const channel = channels[currentIndex];
+            hlsInstance.attachMedia(video);
 
-            triggerOSD(channel);
-
-            // Marcar activo en el menú lateral
-            document
-                .querySelectorAll('.list-row')
-                .forEach(r => r.classList.remove('active'));
-
-            const activeRow =
-                document.getElementById(`row-${channel.dial}`);
-
-            if (activeRow) {
-                activeRow.classList.add('active');
-            }
-
-            // Carga y reproducción de flujo hls (.m3u8)
-            if (
-                typeof Hls !== 'undefined' &&
-                Hls.isSupported()
-            ) {
-                if (hlsInstance) {
-                    hlsInstance.destroy();
+            hlsInstance.on(
+                Hls.Events.MANIFEST_PARSED,
+                () => {
+                    video.play().catch(() => {});
                 }
+            );
 
-                hlsInstance = new Hls();
+        } else if (
+            video.canPlayType(
+                'application/vnd.apple.mpegurl'
+            )
+        ) {
+            video.src = channel.url;
 
-                hlsInstance.loadSource(channel.url);
-                hlsInstance.attachMedia(video);
-
-                hlsInstance.on(
-                    Hls.Events.MANIFEST_PARSED,
-                    () => video.play().catch(() => {})
-                );
-
-            } else if (
-                video.canPlayType(
-                    'application/vnd.apple.mpegurl'
-                )
-            ) {
-                video.src = channel.url;
-
-                video.play().catch(() => {});
-            }
+            video.play().catch(() => {});
         }
+    }
 
-        // Parseador del M3U local
-        async function loadTVCOM() {
-            try {
-                const response = await fetch(m3uUrl);
+    async function loadTVCOM() {
+        try {
+            const response = await fetch(m3uUrl);
 
-                const text = await response.text();
+            const text = await response.text();
 
-                const lines = text.split('\n');
+            const lines = text.split('\n');
 
-                let currentChannel = null;
+            let currentChannel = null;
 
-                for (
-                    let i = 0;
-                    i < lines.length;
-                    i++
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+
+                if (line.startsWith('#EXTINF:')) {
+
+                    const chnoMatch =
+                        line.match(
+                            /tvg-chno="([^"]+)"/
+                        );
+
+                    const logoMatch =
+                        line.match(
+                            /tvg-logo="([^"]+)"/
+                        );
+
+                    const nameParts =
+                        line.split(',');
+
+                    const dialVal =
+                        chnoMatch
+                            ? chnoMatch[1]
+                            : channels.length + 101;
+
+                    const logoVal =
+                        logoMatch
+                            ? logoMatch[1]
+                            : 'https://placeholder.com';
+
+                    const nameVal =
+                        nameParts[
+                            nameParts.length - 1
+                        ].trim();
+
+                    currentChannel = {
+                        dial: dialVal,
+                        logo: logoVal,
+                        name: nameVal
+                    };
+
+                } else if (
+                    line.startsWith('http') &&
+                    currentChannel
                 ) {
-                    const line = lines[i].trim();
+                    currentChannel.url = line;
 
-                    if (line.startsWith('#EXTINF:')) {
+                    channels.push(currentChannel);
 
-                        const chnoMatch =
-                            line.match(
-                                /tvg-chno="([^"]+)"/
-                            );
-
-                        const logoMatch =
-                            line.match(
-                                /tvg-logo="([^"]+)"/
-                            );
-
-                        const nameParts =
-                            line.split(',');
-
-                        currentChannel = {
-                            dial: chnoMatch
-                                ? chnoMatch[1]
-                                : (channels.length + 101),
-
-                            logo: logoMatch
-                                ? logoMatch[1]
-                                : 'placeholder.com',
-
-                            name: nameParts[
-                                nameParts.length - 1
-                            ].trim()
-                        };
-
-                    } else if (
-                        line.startsWith('http') &&
-                        currentChannel
-                    ) {
-                        currentChannel.url = line;
-
-                        channels.push(currentChannel);
-
-                        currentChannel = null;
-                    }
+                    currentChannel = null;
                 }
-
-                // Generar los elementos del menú lateral
-                const boxList =
-                    document.getElementById('box-list');
-
-                boxList.innerHTML = '';
-
-                channels.forEach((channel, idx) => {
-
-                    const row =
-                        document.createElement('div');
-
-                    row.className = 'list-row';
-
-                    row.id =
-                        `row-${channel.dial}`;
-
-                    row.innerHTML = `
-                        <div class="list-num">
-                            ${channel.dial}
-                        </div>
-
-                        <img
-                            class="list-logo"
-                            src="${channel.logo}"
-                            onerror="this.src='https://placeholder.com'"
-                        >
-
-                        <div class="list-name">
-                            ${channel.name}
-                        </div>
-                    `;
-
-                    row.addEventListener(
-                        'click',
-                        () => {
-                            sintonizar(idx);
-
-                            document
-                                .getElementById('panel')
-                                .classList.remove('open');
-                        }
-                    );
-
-                    boxList.appendChild(row);
-                });
-
-                // Carga inicial
-                sintonizar(0);
-
-            } catch (e) {
-                console.error(
-                    "Error cargando el catálogo.",
-                    e
-                );
             }
+
+            const boxList =
+                document.getElementById('box-list');
+
+            boxList.innerHTML = '';
+
+            if (channels.length === 0) {
+                boxList.innerHTML =
+                    'Lista M3U vacía o mal estructurada.';
+
+                return;
+            }
+
+            channels.forEach((channel, idx) => {
+                const row =
+                    document.createElement('div');
+
+                row.className = 'list-row';
+
+                row.id =
+                    `row-${channel.dial}`;
+
+                row.innerHTML = `
+                    <div class="list-num">
+                        ${channel.dial}
+                    </div>
+
+                    <img
+                        class="list-logo"
+                        src="${channel.logo}"
+                        onerror="this.src='https://placeholder.com'"
+                    >
+
+                    <div class="list-name">
+                        ${channel.name}
+                    </div>
+                `;
+
+                row.addEventListener(
+                    'click',
+                    () => {
+                        sintonizar(idx);
+
+                        document
+                            .getElementById('panel')
+                            .classList.remove('open');
+                    }
+                );
+
+                boxList.appendChild(row);
+            });
+
+            /* Lanzar primer canal */
+            sintonizar(0);
+
+        } catch (e) {
+            document
+                .getElementById('box-list')
+                .innerHTML =
+                    'Error de red al leer lista.m3u';
+
+            console.error(e);
         }
+    }
 
-        // Eventos de interfaz interactiva
-        document
-            .getElementById('zap-prev')
-            .addEventListener(
-                'click',
-                () => sintonizar(currentIndex - 1)
-            );
-
-        document
-            .getElementById('zap-next')
-            .addEventListener(
-                'click',
-                () => sintonizar(currentIndex + 1)
-            );
-
-        document
-            .getElementById('open-menu')
-            .addEventListener(
-                'click',
-                () =>
-                    document
-                        .getElementById('panel')
-                        .classList.add('open')
-            );
-
-        document
-            .getElementById('close-menu')
-            .addEventListener(
-                'click',
-                () =>
-                    document
-                        .getElementById('panel')
-                        .classList.remove('open')
-            );
-
-        window.addEventListener(
-            'DOMContentLoaded',
-            loadTVCOM
+    document
+        .getElementById('zap-prev')
+        .addEventListener(
+            'click',
+            () => sintonizar(currentIndex - 1)
         );
-    </script>
+
+    document
+        .getElementById('zap-next')
+        .addEventListener(
+            'click',
+            () => sintonizar(currentIndex + 1)
+        );
+
+    document
+        .getElementById('open-menu')
+        .addEventListener(
+            'click',
+            () =>
+                document
+                    .getElementById('panel')
+                    .classList.add('open')
+        );
+
+    document
+        .getElementById('close-menu')
+        .addEventListener(
+            'click',
+            () =>
+                document
+                    .getElementById('panel')
+                    .classList.remove('open')
+        );
+
+    window.addEventListener(
+        'DOMContentLoaded',
+        loadTVCOM
+    );
+</script>
+```
 
 </body>
 </html>
