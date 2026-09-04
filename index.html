@@ -93,18 +93,16 @@
         <div id="playlist">Cargando canales instantáneamente...</div>
     </div>
 
-    <!-- Cargamos el reproductor de forma asíncrona para que NO ralentice la carga de la web -->
-    <script src="https://cloudflare.com" async defer></script>
+    <!-- CARGA LOCAL PROPIA: Ahora el motor se lee directo desde tu propio servidor GitHub -->
+    <script src="hls.min.js"></script>
 
     <script>
-        // Leemos tu lista.m3u local alojada en tu mismo GitHub
         const m3uUrl = 'lista.m3u';
         const video = document.getElementById('video');
         const playlistContainer = document.getElementById('playlist');
         let hlsInstance = null;
 
         function playChannel(url) {
-            // Esperamos un instante si Hls.js aún se está descargando en segundo plano
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                 if (hlsInstance) {
                     hlsInstance.destroy();
@@ -113,21 +111,18 @@
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                    video.play().catch(e => console.log("Auto-play bloqueado, requiere interacción"));
+                    video.play().catch(e => console.log("Auto-play bloqueado"));
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = url;
                 video.play().catch(e => console.log("Auto-play bloqueado"));
-            } else {
-                // Si la web carga antes que el script, reintentamos en medio segundo
-                setTimeout(() => playChannel(url), 500);
             }
         }
 
         async function loadPlaylist() {
             try {
                 const response = await fetch(m3uUrl);
-                if (!response.ok) throw new Error("No se pudo cargar el archivo lista.m3u");
+                if (!response.ok) throw new Error("Falta el archivo lista.m3u");
                 const text = await response.text();
                 
                 const lines = text.split('\n');
@@ -156,7 +151,7 @@
 
                 playlistContainer.innerHTML = '';
                 if (channels.length === 0) {
-                    playlistContainer.innerHTML = 'No se encontraron canales válidos en lista.m3u.';
+                    playlistContainer.innerHTML = 'No hay canales válidos.';
                     return;
                 }
 
@@ -179,12 +174,11 @@
                 });
 
             } catch (error) {
-                playlistContainer.innerHTML = 'Error: Asegúrate de haber subido el archivo "lista.m3u" a tu repositorio.';
+                playlistContainer.innerHTML = 'Error al cargar la lista local.';
                 console.error(error);
             }
         }
 
-        // Ejecutar carga inmediata al abrir la página
         window.addEventListener('DOMContentLoaded', loadPlaylist);
     </script>
 </body>
