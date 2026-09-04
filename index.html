@@ -379,7 +379,6 @@
         let hlsInstance = null;
         let osdTimeout = null;
 
-        // CONTROLES DEL REPRODUCTOR PERSONALIZADO
         const playPauseBtn = document.getElementById('play-pause-btn');
         const playIcon = document.getElementById('play-icon');
         const pauseIcon = document.getElementById('pause-icon');
@@ -389,7 +388,6 @@
         const volumeBar = document.getElementById('volume-bar');
         const fullScreenBtn = document.getElementById('full-screen-btn');
 
-        // Play y Pausa
         playPauseBtn.addEventListener('click', () => {
             if (video.paused) {
                 video.play();
@@ -402,7 +400,6 @@
             }
         });
 
-        // Mutear / Silenciar
         muteBtn.addEventListener('click', () => {
             video.muted = !video.muted;
             if (video.muted) {
@@ -416,7 +413,6 @@
             }
         });
 
-        // Control manual de la barra de volumen
         volumeBar.addEventListener('input', (e) => {
             video.volume = e.target.value;
             if (video.volume == 0) {
@@ -430,7 +426,6 @@
             }
         });
 
-        // Pantalla completa nativa
         fullScreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 if (theater.requestFullscreen) theater.requestFullscreen();
@@ -441,11 +436,9 @@
             }
         });
 
-        // Banner informativo temporal (OSD)
         function triggerOSD(channel) {
             document.getElementById('osd-num').innerText = channel.dial;
             document.getElementById('osd-name').innerText = channel.name;
-            
             const logoBox = document.getElementById('osd-logo-box');
             if (channel.logo) {
                 logoBox.innerHTML = `<img class="overlay-logo" src="${channel.logo}" onerror="this.style.display='none'">`;
@@ -455,7 +448,6 @@
             
             const osd = document.getElementById('osd');
             osd.classList.add('show');
-            
             clearTimeout(osdTimeout);
             osdTimeout = setTimeout(() => osd.classList.remove('show'), 3000);
         }
@@ -474,7 +466,6 @@
             const activeRow = document.getElementById(`row-${channel.dial}`);
             if (activeRow) activeRow.classList.add('active');
 
-            // Cargar streaming
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                 if (hlsInstance) hlsInstance.destroy();
                 hlsInstance = new Hls();
@@ -494,7 +485,6 @@
                 });
             }
             
-            // Forzar actualización del estado de los botones visuales
             if (!video.paused) {
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'block';
@@ -510,6 +500,7 @@
                 let currentName = "";
                 let currentDial = "";
                 let currentLogo = "";
+                let currentGroup = "";
 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
@@ -518,6 +509,7 @@
                         currentName = "Canal";
                         currentDial = (channels.length + 101).toString();
                         currentLogo = "";
+                        currentGroup = "Otros Canales"; // Categoría por defecto si no tiene
 
                         if (line.includes(',')) {
                             currentName = line.substring(line.lastIndexOf(',') + 1).trim();
@@ -528,12 +520,17 @@
 
                         const logoMatch = line.match(/tvg-logo="([^"]+)"/);
                         if (logoMatch) currentLogo = logoMatch[1];
+
+                        // Extraemos la categoría (group-title) del M3U
+                        const groupMatch = line.match(/group-title="([^"]+)"/);
+                        if (groupMatch) currentGroup = groupMatch[1];
                     } 
                     else if (line.startsWith('http')) {
                         channels.push({
                             dial: currentDial,
                             logo: currentLogo,
                             name: currentName,
+                            group: currentGroup,
                             url: line
                         });
                     }
@@ -543,11 +540,22 @@
                 boxList.innerHTML = '';
                 
                 if (channels.length === 0) {
-                    boxList.innerHTML = '<div style="padding:20px;color:#ff3355;">Sin canales cargados.</div>';
+                    boxList.innerHTML = '<div style="padding:20px;color:#ff3355;">Sin canales</div>';
                     return;
                 }
 
+                let lastGroup = "";
+
                 channels.forEach((channel, idx) => {
+                    // Si el grupo de este canal cambia respecto al anterior, inyectamos un separador visual
+                    if (channel.group !== lastGroup) {
+                        const header = document.createElement('div');
+                        header.className = 'category-header';
+                        header.innerText = channel.group;
+                        boxList.appendChild(header);
+                        lastGroup = channel.group;
+                    }
+
                     const row = document.createElement('div');
                     row.className = 'list-row';
                     row.id = `row-${channel.dial}`;
@@ -568,7 +576,6 @@
                     boxList.appendChild(row);
                 });
 
-                // Iniciar primer canal silenciado por política del navegador (el usuario activa el audio desde el control)
                 video.muted = true;
                 volumeBar.value = 0;
                 volumeOnIcon.style.display = 'none';
@@ -576,7 +583,7 @@
                 sintonizar(0);
 
             } catch (e) {
-                document.getElementById('box-list').innerHTML = '<div style="padding:20px;color:#ff3355;">Error de carga</div>';
+                document.getElementById('box-list').innerHTML = '<div style="padding:20px;color:#ff3355;">Error de red</div>';
                 console.error(e);
             }
         }
