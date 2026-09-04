@@ -237,7 +237,8 @@
     <script src="https://cloudflare.com"></script>
 
     <script>
-        const m3uUrl = 'lista.m3u';
+        // Añadimos un número aleatorio al final para obligar al navegador a descargar la lista nueva siempre
+        const m3uUrl = 'lista.m3u?v=' + Math.random();
         const video = document.getElementById('video');
         let channels = [];
         let currentIndex = 0;
@@ -275,7 +276,9 @@
                 hlsInstance = new Hls();
                 hlsInstance.loadSource(channel.url);
                 hlsInstance.attachMedia(video);
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play().catch(e => console.log("Navegador bloqueó autoplay móvil"));
+                });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = channel.url;
                 video.play().catch(() => {});
@@ -305,10 +308,10 @@
                         }
 
                         const chMatch = line.match(/tvg-chno="([^"]+)"/);
-                        if (chMatch) currentDial = chMatch[1];
+                        if (chMatch) currentDial = chMatch[1]; // Extraemos el texto exacto
 
                         const logoMatch = line.match(/tvg-logo="([^"]+)"/);
-                        if (logoMatch) currentLogo = logoMatch[1];
+                        if (logoMatch) currentLogo = logoMatch[1]; // Extraemos el texto exacto
                     } 
                     else if (line.startsWith('http')) {
                         channels.push({
@@ -324,7 +327,7 @@
                 boxList.innerHTML = '';
                 
                 if (channels.length === 0) {
-                    boxList.innerHTML = '<div style="padding:20px;color:#ff3355;">Sin canales cargados en lista.m3u</div>';
+                    boxList.innerHTML = '<div style="padding:20px;color:#ff3355;">Sin canales en lista.m3u</div>';
                     return;
                 }
 
@@ -347,7 +350,7 @@
                 sintonizar(0);
 
             } catch (e) {
-                document.getElementById('box-list').innerHTML = '<div style="padding:20px;color:#ff3355;">Error de red en lista.m3u</div>';
+                document.getElementById('box-list').innerHTML = '<div style="padding:20px;color:#ff3355;">Error de red</div>';
                 console.error(e);
             }
         }
