@@ -1,1 +1,22 @@
+#EXTM3U
 
+#EXTINF:-1 tvg-chno="101" tvg-id="EuronewsEs" tvg-logo="https://githubusercontent.com",Euronews Español
+https://wurl.tv
+
+#EXTINF:-1 tvg-chno="102" tvg-id="DWespanol" tvg-logo="https://githubusercontent.com",DW Español
+https://akamaized.net
+
+#EXTINF:-1 tvg-chno="201" tvg-id="RuntimeCine" tvg-logo="https://githubusercontent.com",Runtime Cine
+https://amagi.tv
+
+#EXTINF:-1 tvg-chno="202" tvg-id="RuntimeTerror" tvg-logo="https://githubusercontent.com",Runtime Terror
+https://amagi.tv
+
+#EXTINF:-1 tvg-chno="301" tvg-id="RedBullTV" tvg-logo="https://githubusercontent.com",Red Bull TV
+https://akamaized.net
+
+#EXTINF:-1 tvg-chno="401" tvg-id="NasaTV" tvg-logo="https://githubusercontent.com",NASA TV
+https://akamaized.net
+
+#EXTINF:-1 tvg-chno="501" tvg-id="Pocoyo" tvg-logo="https://githubusercontent.com",Pocoyó 24h
+https://amagi.tv
